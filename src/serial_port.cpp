@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "mowgli_unicore_gnss/serial_port.hpp"
+#include "unicore_gnss/serial_port.hpp"
 
 #include <cerrno>
 #include <utility>
@@ -12,7 +12,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 
 SerialPort::SerialPort(std::string device, int baudrate)
@@ -244,4 +244,4 @@ int SerialPort::to_termios_baud(int baudrate) noexcept
   }
 }
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss

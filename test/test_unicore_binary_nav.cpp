@@ -10,12 +10,12 @@
 #include <string>
 #include <vector>
 
-#include "mowgli_unicore_gnss/unicore_binary_nav.hpp"
-#include "mowgli_unicore_gnss/unicore_transport.hpp"
-#include "mowgli_unicore_gnss/um982_parser.hpp"
+#include "unicore_gnss/unicore_binary_nav.hpp"
+#include "unicore_gnss/unicore_transport.hpp"
+#include "unicore_gnss/um982_parser.hpp"
 #include <gtest/gtest.h>
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 namespace
 {
@@ -1146,4 +1146,4 @@ TEST(UnicoreBinaryNavParser, TransportRejectsBadCrcBeforeParsing)
   EXPECT_TRUE(parser.parse(raw_frame).has_value());
 }
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss

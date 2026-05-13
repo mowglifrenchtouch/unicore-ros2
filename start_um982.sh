@@ -3,7 +3,7 @@
 # UM982 GNSS driver startup
 #
 # Launches: um982_node
-# Config read from /opt/mowgli_unicore_gnss/share/mowgli_unicore_gnss/config/um982.yaml
+# Config read from /opt/unicore_gnss/share/unicore_gnss/config/um982.yaml
 # Serial device default: /dev/ttyUSB0 (configurable via params)
 # =============================================================================
 set -euo pipefail
@@ -11,4 +11,4 @@ set -euo pipefail
 echo "[start_um982.sh] Launching Unicore UM982 GNSS driver..."
 
 # Use the launch file to start the driver
-ros2 launch mowgli_unicore_gnss um982_launch.py
+ros2 launch unicore_gnss um982_launch.py

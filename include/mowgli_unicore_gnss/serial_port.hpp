@@ -10,7 +10,7 @@
 
 #include <sys/types.h>
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 
 class SerialPort
@@ -44,4 +44,4 @@ private:
   int fd_{-1};
 };
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss

@@ -1,11 +1,11 @@
-# Docker Image: mowgli_unicore_gnss
+# Docker Image: unicore_gnss
 
 This directory contains the ROS 2 C++ driver for Unicore UM982 GNSS receivers packaged as a Docker image.
 
 ## Build
 
 ```bash
-docker build -t mowgli_unicore_gnss:latest .
+docker build -t unicore_gnss:latest .
 ```
 
 ### Multi-architecture build
@@ -29,11 +29,11 @@ For convenience, use `./build.sh`.
 If you want local images for each architecture separately:
 
 ```bash
-docker buildx build --platform linux/amd64 -t mowgli_unicore_gnss:amd64 --load .
+docker buildx build --platform linux/amd64 -t unicore_gnss:amd64 --load .
 ```
 
 ```bash
-docker buildx build --platform linux/arm64 -t mowgli_unicore_gnss:arm64 --load .
+docker buildx build --platform linux/arm64 -t unicore_gnss:arm64 --load .
 ```
 
 For convenience, use `./build.sh`.
@@ -46,12 +46,12 @@ Mount the serial device where your UM982 is connected (default `/dev/ttyUSB0`):
 docker run --rm -it \
   --device=/dev/ttyUSB0:/dev/ttyUSB0 \
   --network host \
-  mowgli_unicore_gnss:latest
+  unicore_gnss:latest
 ```
 
 ## Configuration
 
-The driver reads parameters from `/opt/mowgli_unicore_gnss/share/mowgli_unicore_gnss/config/um982.yaml` inside the container.
+The driver reads parameters from `/opt/unicore_gnss/share/unicore_gnss/config/um982.yaml` inside the container.
 
 To override at runtime, pass ROS 2 parameter arguments:
 
@@ -59,8 +59,8 @@ To override at runtime, pass ROS 2 parameter arguments:
 docker run --rm -it \
   --device=/dev/ttyUSB0:/dev/ttyUSB0 \
   --network host \
-  mowgli_unicore_gnss:latest \
-  ros2 run mowgli_unicore_gnss um982_node \
+  unicore_gnss:latest \
+  ros2 run unicore_gnss um982_node \
     --ros-args \
     -p port:=/dev/ttyUSB0 \
     -p baudrate:=921600 \
@@ -74,7 +74,7 @@ Example in a larger ROS 2 system (e.g., `docker-compose.yml`):
 ```yaml
 services:
   gnss:
-    image: mowgli_unicore_gnss:latest
+    image: unicore_gnss:latest
     devices:
       - /dev/ttyUSB0:/dev/ttyUSB0
     network_mode: host

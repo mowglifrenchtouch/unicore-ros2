@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "mowgli_unicore_gnss/diagnostic_state.hpp"
+#include "unicore_gnss/diagnostic_state.hpp"
 
 #include <gtest/gtest.h>
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 
 TEST(DiagnosticState, DisabledWhenFeatureTurnedOff)
@@ -27,4 +27,4 @@ TEST(DiagnosticState, LiveWhenEnabledWithFreshData)
   EXPECT_STREQ(diagnostic_feed_state_name(DiagnosticFeedState::kLive), "live");
 }
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss

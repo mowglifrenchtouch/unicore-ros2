@@ -1,4 +1,4 @@
-# UM982Driver
+# Unicore backend drivers for ROS 2
 
 Backend ROS 2 avance pour recepteurs GNSS Unicore N4 de la famille UM980, UM981 et UM982.
 
@@ -6,7 +6,7 @@ Le projet ne se limite pas a un simple parser NMEA: il fournit une chaine comple
 
 ## Presentation
 
-`UM982Driver` est implemente dans le package ROS 2 `mowgli_unicore_gnss` et vise les usages GNSS exigeants:
+`UM982Driver` est implemente dans le package ROS 2 `unicore_gnss` et vise les usages GNSS exigeants:
 
 | Domaine | Capacites |
 | --- | --- |
@@ -91,14 +91,14 @@ um982_node:
 ### Build
 
 ```bash
-colcon build --packages-select mowgli_unicore_gnss
+colcon build --packages-select unicore_gnss
 source install/setup.bash
 ```
 
 ### Launch
 
 ```bash
-ros2 launch mowgli_unicore_gnss um982_launch.py
+ros2 launch unicore_gnss um982_launch.py
 ```
 
 ### Configuration YAML
@@ -221,6 +221,6 @@ Le depot contient deja des tests cibles sur les briques critiques:
 Pour lancer la suite locale:
 
 ```bash
-colcon test --packages-select mowgli_unicore_gnss
+colcon test --packages-select unicore_gnss
 colcon test-result --verbose
 ```

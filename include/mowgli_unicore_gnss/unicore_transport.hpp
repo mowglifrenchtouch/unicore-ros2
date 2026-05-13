@@ -11,7 +11,7 @@
 #include <string_view>
 #include <vector>
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 
 constexpr std::size_t kUnicoreBinaryHeaderSize = 24U;
@@ -113,4 +113,4 @@ private:
   UnicoreBinaryDispatchCounters counters_{};
 };
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss

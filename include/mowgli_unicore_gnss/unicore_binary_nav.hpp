@@ -6,10 +6,10 @@
 
 #include <optional>
 
-#include "mowgli_unicore_gnss/unicore_transport.hpp"
-#include "mowgli_unicore_gnss/um982_parser.hpp"
+#include "unicore_gnss/unicore_transport.hpp"
+#include "unicore_gnss/um982_parser.hpp"
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 
 class UnicoreBinaryNavParser
@@ -31,4 +31,4 @@ private:
   static std::optional<ParsedSentence> parse_satsinfob(const UnicoreBinaryFrame& frame);
 };
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss

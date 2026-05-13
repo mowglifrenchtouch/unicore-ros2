@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "mowgli_unicore_gnss/um982_parser.hpp"
+#include "unicore_gnss/um982_parser.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -12,7 +12,7 @@
 #include <limits>
 #include <string>
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 
 namespace
@@ -1393,4 +1393,4 @@ int Um982Parser::position_type_to_gga_quality(std::string_view text)
   return 0;
 }
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss

@@ -1,6 +1,6 @@
 # Live Validate
 
-`tools/um982_live_validate.py` est l'outil de validation live autonome du driver `mowgli_unicore_gnss`.
+`tools/um982_live_validate.py` est l'outil de validation live autonome du driver `unicore_gnss`.
 
 Il permet de tester un recepteur UM980/UM981/UM982 branche en USB/serie sans dependre de MowgliNext ni de ROS 2. Il sait:
 - capturer le flux brut serie
@@ -210,7 +210,7 @@ Conclusion: PASS
 Le validateur fonctionne sans ROS 2, mais peut etre croise avec:
 
 ```bash
-ros2 launch mowgli_unicore_gnss um982_launch.py
+ros2 launch unicore_gnss um982_launch.py
 ros2 topic hz /gps/fix
 ros2 topic echo /gps/diagnostics --once
 ```

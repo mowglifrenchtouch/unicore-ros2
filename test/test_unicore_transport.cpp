@@ -6,10 +6,10 @@
 #include <string>
 #include <vector>
 
-#include "mowgli_unicore_gnss/unicore_transport.hpp"
+#include "unicore_gnss/unicore_transport.hpp"
 #include <gtest/gtest.h>
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 namespace
 {
@@ -211,4 +211,4 @@ TEST(UnicoreTransport, ExtractsLargeObsvmcmpFrameBelowConfiguredLimit)
   EXPECT_TRUE(events[0].binary_frame->crc_valid);
 }
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss

@@ -5,7 +5,7 @@
 # Launches:
 #   1. um982_node         — UM982 GNSS driver and RTCM injector on /dev/gps
 #   2. ntrip_client_node  — NTRIP caster client publishing /ntrip_client/rtcm
-# Config read from /ws/install/share/mowgli_unicore_gnss/config/um982.yaml
+# Config read from /ws/install/share/unicore_gnss/config/um982.yaml
 # Serial device default: /dev/gps (configurable via params)
 # =============================================================================
 set -euo pipefail
@@ -59,7 +59,7 @@ NTRIP_MOUNTPOINT=$(parse_yaml ntrip_mountpoint)
 NTRIP_ENABLED="${NTRIP_ENABLED:-false}"
 
 echo "[start_gps.sh] Launching Unicore UM982 GNSS driver..."
-ros2 launch mowgli_unicore_gnss um982_launch.py &
+ros2 launch unicore_gnss um982_launch.py &
 GPS_PID=$!
 
 if is_truthy "$NTRIP_ENABLED"; then

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "mowgli_unicore_gnss/unicore_binary_nav.hpp"
+#include "unicore_gnss/unicore_binary_nav.hpp"
 
 #include <array>
 #include <cmath>
@@ -13,7 +13,7 @@
 #include <string>
 #include <string_view>
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 
 namespace
@@ -1217,4 +1217,4 @@ std::optional<ParsedSentence> UnicoreBinaryNavParser::parse_satsinfob(
   return sentence;
 }
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss

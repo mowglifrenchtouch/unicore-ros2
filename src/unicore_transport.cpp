@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "mowgli_unicore_gnss/unicore_transport.hpp"
+#include "unicore_gnss/unicore_transport.hpp"
 
 #include <algorithm>
 #include <array>
 #include <string_view>
 #include <unordered_map>
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 
 namespace
@@ -326,4 +326,4 @@ const char* UnicoreBinaryDispatcher::known_message_name(uint16_t message_id)
   return it != kKnownMessageIds.end() ? it->second : "";
 }
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss

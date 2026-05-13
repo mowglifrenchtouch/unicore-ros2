@@ -5,10 +5,10 @@
 #include <cstdio>
 #include <string>
 
-#include "mowgli_unicore_gnss/um982_parser.hpp"
+#include "unicore_gnss/um982_parser.hpp"
 #include <gtest/gtest.h>
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 namespace
 {
@@ -483,4 +483,4 @@ TEST(Um982Parser, CountsParseErrorsOnMalformedStructuredLog)
   EXPECT_EQ(parser.counters().parse_errors, 1U);
 }
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss

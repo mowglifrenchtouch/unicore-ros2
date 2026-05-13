@@ -22,18 +22,18 @@
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <sensor_msgs/msg/nav_sat_status.hpp>
 
-#include "mowgli_unicore_gnss/diagnostic_state.hpp"
-#include "mowgli_unicore_gnss/unicore_binary_nav.hpp"
-#include "mowgli_unicore_gnss/serial_port.hpp"
-#include "mowgli_unicore_gnss/unicore_transport.hpp"
-#include "mowgli_unicore_gnss/um982_parser.hpp"
+#include "unicore_gnss/diagnostic_state.hpp"
+#include "unicore_gnss/unicore_binary_nav.hpp"
+#include "unicore_gnss/serial_port.hpp"
+#include "unicore_gnss/unicore_transport.hpp"
+#include "unicore_gnss/um982_parser.hpp"
 #include <compass_msgs/msg/azimuth.hpp>
 #include <diagnostic_msgs/msg/diagnostic_array.hpp>
 #include <diagnostic_msgs/msg/diagnostic_status.hpp>
 #include <diagnostic_msgs/msg/key_value.hpp>
 #include <rtcm_msgs/msg/message.hpp>
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 
 namespace
@@ -2991,12 +2991,12 @@ private:
   rclcpp::TimerBase::SharedPtr diagnostics_timer_;
 };
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss
 
 int main(int argc, char* argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<mowgli_unicore_gnss::Um982Node>());
+  rclcpp::spin(std::make_shared<unicore_gnss::Um982Node>());
   rclcpp::shutdown();
   return 0;
 }

@@ -12,7 +12,7 @@
 #include <string_view>
 #include <vector>
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 
 enum class FixSource : uint8_t
@@ -302,4 +302,4 @@ private:
   mutable ParserCounters counters_{};
 };
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss

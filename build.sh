@@ -5,7 +5,7 @@ set -euo pipefail
 # Multi-arch build with buildx + ccache + registry cache
 # =============================================================================
 
-TAG="${1:-ghcr.io/mowglifrenchtouch/um982driver:mowgli}"
+TAG="${1:-ghcr.io/mowglifrenchtouch/unicore-ros2:mowgli}"
 PLATFORMS="${2:-linux/amd64,linux/arm64}"
 BUILDER="mowgli-builder"
 CACHE_IMAGE="${TAG}-mowgli"

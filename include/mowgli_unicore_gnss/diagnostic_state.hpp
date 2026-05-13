@@ -4,7 +4,7 @@
 
 #pragma once
 
-namespace mowgli_unicore_gnss
+namespace unicore_gnss
 {
 
 enum class DiagnosticFeedState
@@ -37,4 +37,4 @@ inline const char* diagnostic_feed_state_name(DiagnosticFeedState state)
   return "unknown";
 }
 
-}  // namespace mowgli_unicore_gnss
+}  // namespace unicore_gnss

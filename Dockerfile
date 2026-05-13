@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 # =============================================================================
-# Unicore UM982 GNSS driver (mowgli_unicore_gnss) — ROS 2 C++
+# Unicore UM982 GNSS driver (unicore_gnss) — ROS 2 C++
 #
 # Publishes:
 #   /gps/fix            sensor_msgs/NavSatFix
@@ -49,21 +49,21 @@ COPY ntrip_client_node/CMakeLists.txt ntrip_client_node/CMakeLists.txt
 COPY ntrip_client_node/include/ ntrip_client_node/include/
 COPY ntrip_client_node/src/ ntrip_client_node/src/
 
-COPY CMakeLists.txt mowgli_unicore_gnss/CMakeLists.txt
-COPY package.xml mowgli_unicore_gnss/package.xml
-COPY include/ mowgli_unicore_gnss/include/
-COPY src/ mowgli_unicore_gnss/src/
-COPY launch/ mowgli_unicore_gnss/launch/
-COPY config/ mowgli_unicore_gnss/config/
-COPY test/ mowgli_unicore_gnss/test/
+COPY CMakeLists.txt unicore_gnss/CMakeLists.txt
+COPY package.xml unicore_gnss/package.xml
+COPY include/ unicore_gnss/include/
+COPY src/ unicore_gnss/src/
+COPY launch/ unicore_gnss/launch/
+COPY config/ unicore_gnss/config/
+COPY test/ unicore_gnss/test/
 
 WORKDIR /ws
 
 RUN --mount=type=cache,target=/root/.ccache,sharing=locked \
     . /opt/ros/kilted/setup.sh \
  && colcon build --merge-install \
-      --base-paths src/compass_msgs src/ntrip_client_node src/mowgli_unicore_gnss \
-      --packages-up-to ntrip_client_node mowgli_unicore_gnss \
+      --base-paths src/compass_msgs src/ntrip_client_node src/unicore_gnss \
+      --packages-up-to ntrip_client_node unicore_gnss \
       --cmake-args \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_COMPILER_LAUNCHER=ccache \
