@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  gnss:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mowgli_unicore_gnss:latest
+    container_name: mowgli_gnss
+    
+    # Mount serial device where UM982 is connected
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    
+    # Use host network for ROS 2 DDS communication
+    network_mode: host
+    
+    # Keep running unless stopped
+    restart: unless-stopped
+    
+    # Optional: environment variables for ROS 2
+    environment:
+      - ROS_DOMAIN_ID=42
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    
+    # Optional: mount a custom config (override um982.yaml)
+    # volumes:
+    #   - ./config/um982.yaml:/opt/mowgli_unicore_gnss/share/mowgli_unicore_gnss/config/um982.yaml:ro

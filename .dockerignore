@@ -1,0 +1,13 @@
+.git
+.gitignore
+.vscode
+build
+install
+log
+*.swp
+*.swo
+*~
+.DS_Store
+.idea
+__pycache__
+*.pyc
