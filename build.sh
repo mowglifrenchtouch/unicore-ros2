@@ -5,10 +5,10 @@ set -euo pipefail
 # Multi-arch build with buildx + ccache + registry cache
 # =============================================================================
 
-TAG="${1:-ghcr.io/mowglifrenchtouch/unicore-ros2:mowgli}"
+TAG="${1:-unicore-ros2:local}"
 PLATFORMS="${2:-linux/amd64,linux/arm64}"
-BUILDER="mowgli-builder"
-CACHE_IMAGE="${TAG}-mowgli"
+BUILDER="unicore-builder"
+CACHE_IMAGE="${TAG}-cache"
 
 echo "TAG        : $TAG"
 echo "PLATFORMS  : $PLATFORMS"

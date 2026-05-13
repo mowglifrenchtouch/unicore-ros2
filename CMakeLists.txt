@@ -29,21 +29,28 @@ target_include_directories(${PROJECT_NAME}_core
     $<INSTALL_INTERFACE:include>
 )
 
-add_executable(um982_node
-  src/um982_node.cpp
+set(UNICORE_NODE_TARGETS
+  unicore_node
+  um982_node
 )
 
-target_link_libraries(um982_node
-  ${PROJECT_NAME}_core
-)
+foreach(node_target IN LISTS UNICORE_NODE_TARGETS)
+  add_executable(${node_target}
+    src/um982_node.cpp
+  )
 
-ament_target_dependencies(um982_node
-  rclcpp
-  sensor_msgs
-  compass_msgs
-  diagnostic_msgs
-  rtcm_msgs
-)
+  target_link_libraries(${node_target}
+    ${PROJECT_NAME}_core
+  )
+
+  ament_target_dependencies(${node_target}
+    rclcpp
+    sensor_msgs
+    compass_msgs
+    diagnostic_msgs
+    rtcm_msgs
+  )
+endforeach()
 
 install(
   DIRECTORY include/
@@ -61,7 +68,7 @@ install(
 )
 
 install(
-  TARGETS ${PROJECT_NAME}_core um982_node
+  TARGETS ${PROJECT_NAME}_core ${UNICORE_NODE_TARGETS}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

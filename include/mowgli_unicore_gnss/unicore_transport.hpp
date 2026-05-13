@@ -6,6 +6,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <map>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -25,6 +26,7 @@ enum class UnicoreTransportEventKind : uint8_t
 
 struct UnicoreBinaryFrame
 {
+  uint8_t header_length{kUnicoreBinaryHeaderSize};
   uint8_t cpu_idle{0U};
   uint16_t message_id{0U};
   uint16_t payload_length{0U};
@@ -59,6 +61,10 @@ struct UnicoreBinaryTransportCounters
   std::size_t frames_total{0U};
   std::size_t crc_errors{0U};
   std::size_t resync_count{0U};
+  std::size_t sync_candidates{0U};
+  std::optional<uint8_t> last_header_length;
+  std::optional<uint16_t> last_payload_length;
+  std::map<std::string, std::size_t> frame_parse_errors_by_reason;
 };
 
 struct UnicoreBinaryDispatchResult
@@ -95,10 +101,12 @@ private:
   static uint32_t crc32_unicore_binary(std::string_view data);
 
   bool try_extract_binary_frame(std::vector<UnicoreTransportEvent>& events);
+  void count_binary_parse_reason(std::string_view reason);
 
   UnicoreTransportOptions options_;
   std::string buffer_;
   UnicoreBinaryTransportCounters binary_counters_{};
+  bool counted_sync_candidate_{false};
 };
 
 class UnicoreBinaryDispatcher

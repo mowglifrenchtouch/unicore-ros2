@@ -12,6 +12,7 @@
 #include <deque>
 #include <functional>
 #include <limits>
+#include <map>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -202,6 +203,22 @@ std::string join_message_ids(const std::vector<uint16_t>& values)
     text.emplace_back(std::to_string(value));
   }
   return join_strings(text);
+}
+
+std::string describe_string_size_counts(const std::map<std::string, std::size_t>& counts)
+{
+  if (counts.empty())
+  {
+    return "none";
+  }
+
+  std::vector<std::string> parts;
+  parts.reserve(counts.size());
+  for (const auto& [name, count] : counts)
+  {
+    parts.emplace_back(name + "=" + std::to_string(count));
+  }
+  return join_strings(parts);
 }
 
 std::string describe_gps_glo_bds2_signal_mask(int mask)
@@ -608,7 +625,7 @@ public:
                                            std::bind(&Um982Node::publish_diagnostics, this));
 
     RCLCPP_INFO(get_logger(),
-                "UM982 node configured: port=%s baudrate=%d fix_topic=%s heading_topic=%s "
+                "Unicore node configured: port=%s baudrate=%d fix_topic=%s heading_topic=%s "
                 "rtcm_timeout=%.1fs max_diff_age=%.1fs sat_diag_timeout=%.1fs rf_diag_timeout=%.1fs "
                 "raw_diag_timeout=%.1fs raw_diag=%s use_binary_raw=%s raw_debug_entries=%d "
                 "binary=%s strict_crc=%s binary_max_frame=%zu use_binary_nav=%s "
@@ -687,7 +704,7 @@ private:
       RCLCPP_WARN_THROTTLE(get_logger(),
                            *get_clock(),
                            5000,
-                           "Dropping oversized UM982 receive buffer");
+                           "Dropping oversized Unicore receive buffer");
       transport_.clear();
     }
   }
@@ -708,7 +725,7 @@ private:
     last_open_attempt_ = now;
     if (serial_.open())
     {
-      RCLCPP_INFO(get_logger(), "Opened UM982 serial port %s at %d baud", port_.c_str(), baudrate_);
+      RCLCPP_INFO(get_logger(), "Opened Unicore serial port %s at %d baud", port_.c_str(), baudrate_);
       transport_.clear();
     }
     else
@@ -716,7 +733,7 @@ private:
       RCLCPP_WARN_THROTTLE(get_logger(),
                            *get_clock(),
                            5000,
-                           "Unable to open UM982 serial port %s: %s",
+                           "Unable to open Unicore serial port %s: %s",
                            port_.c_str(),
                            std::strerror(errno));
     }
@@ -1468,7 +1485,7 @@ private:
   {
     diagnostic_msgs::msg::DiagnosticStatus s;
     s.name = "GPS: fix";
-    s.hardware_id = "unicore_um982";
+    s.hardware_id = "unicore_n4";
 
     const auto bestnav = active_bestnav();
     const auto ascii_fix = active_ascii_fix();
@@ -1636,7 +1653,7 @@ private:
   {
     diagnostic_msgs::msg::DiagnosticStatus s;
     s.name = "GPS: satellites";
-    s.hardware_id = "unicore_um982";
+    s.hardware_id = "unicore_n4";
     if (!enable_satellite_status_)
     {
       s.values.push_back(kv("feed_state", diagnostic_feed_state_name(
@@ -1925,7 +1942,7 @@ private:
   {
     diagnostic_msgs::msg::DiagnosticStatus s;
     s.name = "GPS: RTK";
-    s.hardware_id = "unicore_um982";
+    s.hardware_id = "unicore_n4";
     if (!enable_rtk_status_)
     {
       s.values.push_back(kv("feed_state",
@@ -2124,7 +2141,7 @@ private:
   {
     diagnostic_msgs::msg::DiagnosticStatus s;
     s.name = "GPS: NTRIP/RTCM";
-    s.hardware_id = "unicore_um982";
+    s.hardware_id = "unicore_n4";
 
     constexpr double window_s = 5.0;
     const auto now_t = std::chrono::steady_clock::now();
@@ -2256,7 +2273,7 @@ private:
   {
     diagnostic_msgs::msg::DiagnosticStatus s;
     s.name = "GPS: rf";
-    s.hardware_id = "unicore_um982";
+    s.hardware_id = "unicore_n4";
     if (!enable_rf_status_)
     {
       s.values.push_back(kv("feed_state",
@@ -2377,7 +2394,7 @@ private:
   {
     diagnostic_msgs::msg::DiagnosticStatus s;
     s.name = "GPS: hardware";
-    s.hardware_id = "unicore_um982";
+    s.hardware_id = "unicore_n4";
     if (!enable_hw_status_)
     {
       s.values.push_back(kv("feed_state",
@@ -2500,7 +2517,7 @@ private:
   {
     diagnostic_msgs::msg::DiagnosticStatus s;
     s.name = "GPS: jamming";
-    s.hardware_id = "unicore_um982";
+    s.hardware_id = "unicore_n4";
     if (!enable_jamming_status_)
     {
       s.values.push_back(kv("feed_state",
@@ -2662,7 +2679,7 @@ private:
   {
     diagnostic_msgs::msg::DiagnosticStatus s;
     s.name = "GPS: raw observations";
-    s.hardware_id = "unicore_um982";
+    s.hardware_id = "unicore_n4";
     if (!enable_raw_observation_diag_)
     {
       s.values.push_back(kv("feed_state",
@@ -2766,7 +2783,7 @@ private:
   {
     diagnostic_msgs::msg::DiagnosticStatus s;
     s.name = "GPS: parser";
-    s.hardware_id = "unicore_um982";
+    s.hardware_id = "unicore_n4";
 
     const ParserCounters current = parser_.counters();
     const std::size_t delta_parse = current.parse_errors - parser_counters_snapshot_.parse_errors;
@@ -2799,6 +2816,19 @@ private:
     s.values.push_back(kv("binary_frames_total", std::to_string(binary_current.frames_total)));
     s.values.push_back(kv("binary_crc_errors", std::to_string(binary_current.crc_errors)));
     s.values.push_back(kv("binary_resync_count", std::to_string(binary_current.resync_count)));
+    s.values.push_back(
+        kv("binary_sync_candidates", std::to_string(binary_current.sync_candidates)));
+    s.values.push_back(kv("binary_header_len",
+                          binary_current.last_header_length.has_value()
+                              ? std::to_string(*binary_current.last_header_length)
+                              : "n/a"));
+    s.values.push_back(kv("binary_payload_len",
+                          binary_current.last_payload_length.has_value()
+                              ? std::to_string(*binary_current.last_payload_length)
+                              : "n/a"));
+    s.values.push_back(kv("binary_frame_parse_errors_by_reason",
+                          describe_string_size_counts(
+                              binary_current.frame_parse_errors_by_reason)));
     s.values.push_back(kv("binary_unknown_frames_total",
                           std::to_string(binary_dispatch.unknown_frames)));
     s.values.push_back(

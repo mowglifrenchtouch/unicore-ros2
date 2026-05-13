@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 # =============================================================================
-# Unicore UM982 GNSS driver (unicore_gnss) — ROS 2 C++
+# Unicore N4 GNSS driver (unicore_gnss) — ROS 2 C++
 #
 # Publishes:
 #   /gps/fix            sensor_msgs/NavSatFix

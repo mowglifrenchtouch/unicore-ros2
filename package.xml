@@ -3,7 +3,7 @@
 <package format="3">
   <name>unicore_gnss</name>
   <version>0.1.0</version>
-  <description>ROS 2 C++ driver for Unicore UM982 GNSS receivers using NMEA and Unicore extended output.</description>
+  <description>Advanced ROS2 GNSS/RTK backend for Unicore N4 receivers.</description>
   <maintainer email="pepeuch@gmail.com">Pepeuch</maintainer>
   <license>Apache-2.0</license>
 

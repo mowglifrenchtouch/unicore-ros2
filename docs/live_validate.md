@@ -1,8 +1,8 @@
 # Live Validate
 
-`tools/um982_live_validate.py` est l'outil de validation live autonome du driver `unicore_gnss`.
+`tools/unicore_live_validate.py` est l'outil de validation live autonome du driver `unicore_gnss`.
 
-Il permet de tester un recepteur UM980/UM981/UM982 branche en USB/serie sans dependre de MowgliNext ni de ROS 2. Il sait:
+Il permet de tester un recepteur Unicore N4 ou UM9xx compatible branche en USB/serie sans dependre de ROS 2. Il sait:
 - capturer le flux brut serie
 - reconnaitre `NMEA`, `Unicore ASCII` et `Unicore binary`
 - verifier checksums et CRC
@@ -13,7 +13,7 @@ Il permet de tester un recepteur UM980/UM981/UM982 branche en USB/serie sans dep
 ## Usage
 
 ```bash
-python3 tools/um982_live_validate.py --help
+python3 tools/unicore_live_validate.py --help
 ```
 
 Arguments principaux:
@@ -63,7 +63,7 @@ Pour tester rapidement uniquement la grammaire des logs sans lancer une
 capture longue:
 
 ```bash
-python3 tools/um982_live_validate.py \
+python3 tools/unicore_live_validate.py \
   --port /dev/ttyUSB0 \
   --baud 921600 \
   --profile debug \
@@ -88,7 +88,7 @@ python3 tools/um982_live_validate.py \
 Premiere remise a plat:
 
 ```bash
-python3 tools/um982_live_validate.py \
+python3 tools/unicore_live_validate.py \
   --port /dev/ttyUSB0 \
   --baud 921600 \
   --profile normal \
@@ -103,7 +103,7 @@ python3 tools/um982_live_validate.py \
 Tests suivants:
 
 ```bash
-python3 tools/um982_live_validate.py \
+python3 tools/unicore_live_validate.py \
   --port /dev/ttyUSB0 \
   --baud 921600 \
   --profile normal \
@@ -117,7 +117,7 @@ python3 tools/um982_live_validate.py \
 Validation debug ASCII:
 
 ```bash
-python3 tools/um982_live_validate.py \
+python3 tools/unicore_live_validate.py \
   --port /dev/ttyUSB0 \
   --baud 921600 \
   --duration 30 \
@@ -131,7 +131,7 @@ python3 tools/um982_live_validate.py \
 Validation survey hybride:
 
 ```bash
-python3 tools/um982_live_validate.py \
+python3 tools/unicore_live_validate.py \
   --port /dev/ttyUSB0 \
   --baud 921600 \
   --duration 60 \
@@ -188,7 +188,7 @@ Le resume console et JSON contient:
 ## Exemple De Sortie
 
 ```text
-UM982 Live Validation
+Unicore Live Validation
 Port: /dev/ttyUSB0 requested=921600 baud detected=921600 capture=921600
 Profile: survey  Format: hybrid  Duration: 60.0 s
 Capture: 1438291 B, 1842 ASCII lines, 1760 binary frames
@@ -210,11 +210,13 @@ Conclusion: PASS
 Le validateur fonctionne sans ROS 2, mais peut etre croise avec:
 
 ```bash
-ros2 launch unicore_gnss um982_launch.py
+ros2 launch unicore_gnss unicore_launch.py
 ros2 topic hz /gps/fix
 ros2 topic echo /gps/diagnostics --once
 ```
 
-## Integration MowgliNext
+## Integration Robot
 
-MowgliNext ne doit garder qu'un wrapper leger d'integration robot, par exemple `sensors/unicore/validate_live.sh`, qui appelle cet outil du driver.
+Un projet robot peut garder un wrapper leger d'integration, par exemple `sensors/unicore/validate_live.sh`, qui appelle cet outil du driver.
+
+Pour compatibilite, `tools/um982_live_validate.py` reste disponible comme wrapper vers `tools/unicore_live_validate.py`.

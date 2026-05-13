@@ -1,16 +1,16 @@
-# Unicore backend drivers for ROS 2
+# Unicore N4 ROS2 Driver
 
-Backend ROS 2 avance pour recepteurs GNSS Unicore N4 de la famille UM980, UM981 et UM982.
+Advanced ROS2 GNSS/RTK backend for Unicore N4 receivers.
 
 Le projet ne se limite pas a un simple parser NMEA: il fournit une chaine complete de transport serie, parsing Unicore ASCII et binaire, validation hybride, publication ROS 2, injection RTCM, diagnostics riches et outillage de validation terrain.
 
 ## Presentation
 
-`UM982Driver` est implemente dans le package ROS 2 `unicore_gnss` et vise les usages GNSS exigeants:
+Le backend `unicore_gnss` vise les usages GNSS exigeants:
 
 | Domaine | Capacites |
 | --- | --- |
-| Recepteurs cibles | UM980, UM981, UM982 |
+| Recepteurs cibles | UM980, UM981, UM982, autres N4 compatibles si valides plus tard |
 | Formats | ASCII, binary, hybrid |
 | Navigation | `GGA`, `PVTSLNA`, `PVTSLNB`, `BESTNAVA`, `BESTNAVB`, heading |
 | RTK / corrections | `RTKSTATUSA/B`, `RTCMSTATUSA/B`, injection RTCM ROS 2 |
@@ -48,7 +48,7 @@ Le backend est structure en briques separees pour garder un pipeline lisible et 
 | Parser binaire | `src/unicore_binary_nav.cpp` decode les messages N4 binaires equivalentes, y compris `OBSVMCMPB`. |
 | Diagnostics | `src/um982_node.cpp` construit des `diagnostic_msgs/DiagnosticArray` pour fix, RTK, RTCM, satellites, RF, hardware, jamming, raw observations et sante parser/transport. |
 | Integration ROS 2 | Le noeud publie `sensor_msgs/msg/NavSatFix`, `compass_msgs/msg/Azimuth`, consomme `rtcm_msgs/msg/Message` et expose une configuration YAML/launch standard. |
-| Validation live | `tools/um982_live_validate.py` permet de valider un flux serie en direct sans lancer ROS 2. |
+| Validation live | `tools/unicore_live_validate.py` permet de valider un flux serie en direct sans lancer ROS 2. |
 
 ## Runtime profiles
 
@@ -69,10 +69,10 @@ Les profils pilotent le niveau de verbosite et la profondeur des diagnostics att
 | `binary` | Backend pilote a partir des messages binaires N4. | Precision et richesse des messages binaires. |
 | `hybrid` | ASCII + binaire avec comparaison croisee. | Validation de firmware, verification terrain, migration progressive. |
 
-Les bascules principales se font via `config/um982.yaml`:
+Les bascules principales se font via `config/unicore.yaml`:
 
 ```yaml
-um982_node:
+unicore_node:
   ros__parameters:
     enable_unicore_binary: true
     use_binary_nav: true
@@ -98,7 +98,7 @@ source install/setup.bash
 ### Launch
 
 ```bash
-ros2 launch unicore_gnss um982_launch.py
+ros2 launch unicore_gnss unicore_launch.py
 ```
 
 ### Configuration YAML
@@ -106,7 +106,7 @@ ros2 launch unicore_gnss um982_launch.py
 Exemple minimal pour un backend hybride oriente precision:
 
 ```yaml
-um982_node:
+unicore_node:
   ros__parameters:
     port: /dev/gps
     baudrate: 921600
@@ -144,7 +144,7 @@ um982_node:
 Validation rapide d'un flux hybride sur le port serie:
 
 ```bash
-python3 tools/um982_live_validate.py \
+python3 tools/unicore_live_validate.py \
   --port /dev/ttyUSB0 \
   --baud 921600 \
   --duration 30 \
@@ -183,7 +183,7 @@ Le noeud publie un `diagnostic_msgs/msg/DiagnosticArray` sur `diagnostics_topic`
 
 | Axe | Recommandation |
 | --- | --- |
-| Live validator | Utiliser `tools/um982_live_validate.py` avant une session longue pour verifier profil, format et densite de logs. |
+| Live validator | Utiliser `tools/unicore_live_validate.py` avant une session longue pour verifier profil, format et densite de logs. |
 | Hybrid comparison | Preferer `--format hybrid` lors des validations firmware ou des regressions backend pour croiser ASCII et binary. |
 | Raw capture | Activer `--enable-raw` en `survey` ou `high_precision` pour confirmer la presence de `OBSVMCMPB`. |
 | Survey | En terrain, privilegier `survey` pour une telemetrie riche et une observation stabilisee. |
@@ -216,7 +216,17 @@ Le depot contient deja des tests cibles sur les briques critiques:
 | Transport | extraction de trames binaires, CRC, resynchronisation |
 | Parser ASCII | `PVTSLNA`, `BESTNAVA`, `BESTSATA`, `SATSINFOA`, `RTKSTATUSA`, `RTCMSTATUSA`, `AGCA`, `HWSTATUSA`, `JAMSTATUSA`, `FREQJAMSTATUSA` |
 | Parser binaire | `BESTNAVB`, `PVTSLNB`, `BESTSATB`, `SATSINFOB`, `RTCMSTATUSB`, `RTKSTATUSB`, `AGCB`, `HWSTATUSB`, `JAMSTATUSB`, `FREQJAMSTATUSB`, `OBSVMCMPB` |
-| Outils | smoke tests sur `tools/um982_live_validate.py` |
+| Outils | smoke tests sur `tools/unicore_live_validate.py` |
+
+## Compatibility aliases
+
+Les anciens noms `um982_*` restent disponibles temporairement pour ne pas casser les integrations existantes.
+
+- `launch/um982_launch.py` appelle `launch/unicore_launch.py`
+- `config/um982.yaml` reste disponible comme alias de compatibilite de `config/unicore.yaml`
+- `tools/um982_live_validate.py` appelle `tools/unicore_live_validate.py`
+- `start_um982.sh` appelle `start_unicore.sh`
+- l'executable ROS 2 `um982_node` reste installe a cote de `unicore_node`
 
 Pour lancer la suite locale:
 

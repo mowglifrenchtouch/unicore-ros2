@@ -71,6 +71,11 @@ std::vector<UnicoreTransportEvent> UnicoreTransport::drain()
 
     if (sync == 0U)
     {
+      if (!counted_sync_candidate_)
+      {
+        ++binary_counters_.sync_candidates;
+        counted_sync_candidate_ = true;
+      }
       if (try_extract_binary_frame(events))
       {
         continue;
@@ -82,6 +87,7 @@ std::vector<UnicoreTransportEvent> UnicoreTransport::drain()
     {
       std::string line = buffer_.substr(0U, newline);
       buffer_.erase(0U, newline + 1U);
+      counted_sync_candidate_ = false;
       if (!line.empty() && line.back() == '\r')
       {
         line.pop_back();
@@ -100,6 +106,7 @@ std::vector<UnicoreTransportEvent> UnicoreTransport::drain()
     {
       buffer_.erase(0U, sync);
       ++binary_counters_.resync_count;
+      counted_sync_candidate_ = false;
       continue;
     }
 
@@ -115,6 +122,7 @@ std::vector<UnicoreTransportEvent> UnicoreTransport::drain()
 
     buffer_.erase(0U, 1U);
     ++binary_counters_.resync_count;
+    counted_sync_candidate_ = false;
   }
 
   return events;
@@ -123,6 +131,7 @@ std::vector<UnicoreTransportEvent> UnicoreTransport::drain()
 void UnicoreTransport::clear()
 {
   buffer_.clear();
+  counted_sync_candidate_ = false;
 }
 
 std::size_t UnicoreTransport::buffered_bytes() const
@@ -218,6 +227,8 @@ bool UnicoreTransport::try_extract_binary_frame(std::vector<UnicoreTransportEven
   {
     buffer_.erase(0U, 1U);
     ++binary_counters_.resync_count;
+    count_binary_parse_reason("frame_too_large");
+    counted_sync_candidate_ = false;
     return true;
   }
 
@@ -232,16 +243,19 @@ bool UnicoreTransport::try_extract_binary_frame(std::vector<UnicoreTransportEven
   if (!crc_ok)
   {
     ++binary_counters_.crc_errors;
+    count_binary_parse_reason("crc_mismatch");
     if (options_.strict_binary_crc)
     {
       buffer_.erase(0U, 1U);
       ++binary_counters_.resync_count;
+      counted_sync_candidate_ = false;
       return true;
     }
   }
 
   // N4 R1.4 binary fields are little-endian, matching the documented byte offsets.
   UnicoreBinaryFrame frame;
+  frame.header_length = static_cast<uint8_t>(kUnicoreBinaryHeaderSize);
   frame.cpu_idle = raw[3U];
   frame.message_id = read_le16(raw + 4U);
   frame.payload_length = payload_length;
@@ -258,12 +272,20 @@ bool UnicoreTransport::try_extract_binary_frame(std::vector<UnicoreTransportEven
 
   buffer_.erase(0U, frame_size);
   ++binary_counters_.frames_total;
+  binary_counters_.last_header_length = static_cast<uint8_t>(kUnicoreBinaryHeaderSize);
+  binary_counters_.last_payload_length = payload_length;
+  counted_sync_candidate_ = false;
 
   UnicoreTransportEvent event;
   event.kind = UnicoreTransportEventKind::kBinaryFrame;
   event.binary_frame = std::move(frame);
   events.push_back(std::move(event));
   return true;
+}
+
+void UnicoreTransport::count_binary_parse_reason(std::string_view reason)
+{
+  ++binary_counters_.frame_parse_errors_by_reason[std::string(reason)];
 }
 
 UnicoreBinaryDispatchResult UnicoreBinaryDispatcher::dispatch(const UnicoreBinaryFrame& frame)

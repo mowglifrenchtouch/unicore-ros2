@@ -1,6 +1,6 @@
-# Docker Image: unicore_gnss
+# Docker Image: Unicore N4 ROS2 Driver
 
-This directory contains the ROS 2 C++ driver for Unicore UM982 GNSS receivers packaged as a Docker image.
+This directory contains the ROS 2 C++ driver for Unicore N4 GNSS receivers packaged as a Docker image.
 
 ## Build
 
@@ -14,14 +14,14 @@ Build both amd64 and arm64 images and push to GitHub Container Registry:
 
 ```bash
 docker buildx build --platform linux/amd64,linux/arm64 \
-  -t ghcr.io/mowglifrenchtouch/um982driver:kilted \
+  -t ghcr.io/<your-org>/unicore-ros2:latest \
   --push .
 ```
 
 You must be logged in to GHCR first:
 
 ```bash
-echo "$GHCR_PAT" | docker login ghcr.io -u mowglifrenchtouch --password-stdin
+echo "$GHCR_PAT" | docker login ghcr.io -u <your-gh-user> --password-stdin
 ```
 
 For convenience, use `./build.sh`.
@@ -40,7 +40,7 @@ For convenience, use `./build.sh`.
 
 ## Run
 
-Mount the serial device where your UM982 is connected (default `/dev/ttyUSB0`):
+Mount the serial device where your Unicore receiver is connected (default `/dev/ttyUSB0`):
 
 ```bash
 docker run --rm -it \
@@ -51,7 +51,7 @@ docker run --rm -it \
 
 ## Configuration
 
-The driver reads parameters from `/opt/unicore_gnss/share/unicore_gnss/config/um982.yaml` inside the container.
+The driver reads parameters from `/opt/unicore_gnss/share/unicore_gnss/config/unicore.yaml` inside the container.
 
 To override at runtime, pass ROS 2 parameter arguments:
 
@@ -60,7 +60,7 @@ docker run --rm -it \
   --device=/dev/ttyUSB0:/dev/ttyUSB0 \
   --network host \
   unicore_gnss:latest \
-  ros2 run unicore_gnss um982_node \
+  ros2 run unicore_gnss unicore_node \
     --ros-args \
     -p port:=/dev/ttyUSB0 \
     -p baudrate:=921600 \
@@ -89,7 +89,7 @@ services:
 
 ## Serial Port Configuration
 
-UM982 **must** be configured to output NMEA/Unicore sentences on its serial port:
+The receiver **must** be configured to output NMEA/Unicore sentences on its serial port:
 
 ```
 config com2 921600
