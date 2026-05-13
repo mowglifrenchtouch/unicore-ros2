@@ -30,9 +30,39 @@ Arguments principaux:
 - `--apply-profile-logs`
 - `--discover-log-syntax`
 - `--enable-raw`
+- `--enable-ggah`
 - `--raw-output capture.bin`
 - `--text-output capture.log`
 - `--summary summary.json`
+
+Notes NMEA utiles:
+- `GPGGA` accepte aussi une sortie observee sous `$GNGGA`
+- `GPGGAH` accepte aussi `$GNGGAH`
+- `GPGGAH` reste desactive par defaut et sert surtout aux configurations dual-antenna
+
+## Debug CRC Binaire
+
+Quand une capture montre bien `AA 44 B5` mais que le validateur remonte
+des `binary_crc_errors`, tu peux sonder directement la variante CRC
+utilisee par le firmware avec:
+
+```bash
+python3 tools/unicore_crc_probe.py --input /tmp/unicore-hybrid.bin
+```
+
+Ou sur une trame hexadecimale brute:
+
+```bash
+python3 tools/unicore_crc_probe.py --hex aa44b5...
+```
+
+Pour les trames N4 observees sur UM98x, la variante correcte est:
+- CRC32 reflechi
+- polynomial `0x04C11DB7` / forme reflechee `0xEDB88320`
+- `init=0x00000000`
+- `xorout=0x00000000`
+- calcul sur `sync + header + payload`
+- champ CRC stocke en little-endian
 
 ## Compatibilite De Syntaxe LOG
 

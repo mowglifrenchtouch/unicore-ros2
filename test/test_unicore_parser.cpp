@@ -5,7 +5,7 @@
 #include <cstdio>
 #include <string>
 
-#include "unicore_gnss/um982_parser.hpp"
+#include "unicore_gnss/unicore_parser.hpp"
 #include <gtest/gtest.h>
 
 namespace unicore_gnss

@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import argparse
-import binascii
 import json
 import math
 import os
@@ -32,7 +31,7 @@ KNOWN_UNICORE_ASCII_TYPES = {
     "VERSIONA",
 }
 KNOWN_NMEA_SUFFIXES = {"GGA", "GSV", "HDT", "HPR"}
-KNOWN_NMEA_TYPES = {"GNHPR2", "GPHPR2"}
+KNOWN_NMEA_TYPES = {"GNHPR2", "GPHPR2", "GPGGAH", "GNGGAH"}
 KNOWN_BINARY_IDS = {
     138: "OBSVMCMPB",
     218: "HWSTATUSB",
@@ -94,6 +93,9 @@ MAX_BINARY_CRC_FAILURE_HISTORY = 512
 LOG_SYNTAX_NMEA_ONTIME = "nmea_log_ontime"
 LOG_SYNTAX_UNICORE_DIRECT_PERIOD = "unicore_direct_period"
 LOG_SYNTAX_UNICORE_ONCHANGED = "unicore_onchanged"
+GSV_OUTPUT_NAMES = ("GPGSV", "GLGSV", "GAGSV", "GBGSV", "GQGSV")
+GGA_OUTPUT_NAMES = ("GPGGA", "GNGGA")
+GGAH_OUTPUT_NAMES = ("GPGGAH", "GNGGAH")
 
 
 @dataclass(frozen=True)
@@ -104,7 +106,9 @@ class LogCommandSpec:
 
 
 LOG_COMMAND_SPECS = {
-    "GPGGA": LogCommandSpec(LOG_SYNTAX_NMEA_ONTIME, ("GPGGA",)),
+    "GPGGA": LogCommandSpec(LOG_SYNTAX_NMEA_ONTIME, GGA_OUTPUT_NAMES),
+    "GPGGAH": LogCommandSpec(LOG_SYNTAX_NMEA_ONTIME, GGAH_OUTPUT_NAMES),
+    "GPGSV": LogCommandSpec(LOG_SYNTAX_UNICORE_DIRECT_PERIOD, GSV_OUTPUT_NAMES),
     "PVTSLNA": LogCommandSpec(LOG_SYNTAX_NMEA_ONTIME, ("PVTSLNA",)),
     "PVTSLNB": LogCommandSpec(LOG_SYNTAX_NMEA_ONTIME, ("PVTSLNB",)),
     "BESTNAVA": LogCommandSpec(LOG_SYNTAX_UNICORE_DIRECT_PERIOD, ("BESTNAVA",)),
@@ -118,6 +122,7 @@ LOG_COMMAND_SPECS = {
 }
 PLANNED_LOG_MESSAGES = {
     "GPGGA",
+    "GPGGAH",
     "PVTSLNA",
     "PVTSLNB",
     "BESTNAVA",
@@ -133,9 +138,6 @@ PLANNED_LOG_MESSAGES = {
     "SATSINFOA",
     "SATSINFOB",
     "GPGSV",
-    "GLGSV",
-    "GAGSV",
-    "GBGSV",
     "AGCA",
     "AGCB",
     "HWSTATUSA",
@@ -150,7 +152,16 @@ PLANNED_LOG_MESSAGES = {
 
 
 def crc32_unicore(text: bytes) -> int:
-    return binascii.crc32(text) & 0xFFFFFFFF
+    crc = 0
+    for byte in text:
+        crc ^= byte
+        for _ in range(8):
+            lsb = crc & 1
+            crc >>= 1
+            if lsb:
+                crc ^= 0xEDB88320
+        crc &= 0xFFFFFFFF
+    return crc
 
 
 def nmea_checksum(body: bytes) -> int:
@@ -190,6 +201,19 @@ def normalize_constellation_name(text: str) -> str:
     if text in {"SBAS"}:
         return "SBAS"
     return text
+
+
+def constellation_name_from_gsv_talker(talker: str) -> str:
+    mapping = {
+        "GP": "GPS",
+        "GL": "GLO",
+        "GA": "GAL",
+        "GB": "BDS",
+        "GQ": "QZSS",
+        "GI": "IRNSS",
+        "GN": "Mixed",
+    }
+    return mapping.get(talker, talker)
 
 
 def constellation_name_from_system_id(system_id: int) -> str:
@@ -1413,6 +1437,8 @@ class LiveValidator:
                 commands.append(build_planned_log_command(binary_message, period))
 
         add_ascii("GPGGA", periods["main"])
+        if self.args.enable_ggah:
+            add_ascii("GPGGAH", periods["main"])
         add_paired("PVTSLNA", "PVTSLNB", periods["main"])
         add_paired("BESTNAVA", "BESTNAVB", periods["bestnav"])
         add_ascii("GPHPR", periods["main"])
@@ -1425,9 +1451,6 @@ class LiveValidator:
             add_paired("BESTSATA", "BESTSATB", periods["satellite"])
             add_paired("SATSINFOA", "SATSINFOB", periods["satellite"])
             add_ascii("GPGSV", periods["satellite"])
-            add_ascii("GLGSV", periods["satellite"])
-            add_ascii("GAGSV", periods["satellite"])
-            add_ascii("GBGSV", periods["satellite"])
 
         if enable_rf:
             add_paired("AGCA", "AGCB", periods["rf"])
@@ -2433,15 +2456,25 @@ class LiveValidator:
         for name, expected_spec in sorted(expected.items()):
             observed_count = 0
             observed_hz = 0.0
+            observed_by_name: Dict[str, int] = {}
             for observed_name in expected_spec.observed_names:
                 observed = self.state.message_counters.get(observed_name, MessageCounter())
                 observed_count += observed.count
                 observed_hz += observed.hz(duration_sec)
+                if observed.count > 0:
+                    observed_by_name[observed_name] = observed.count
+            observed_aliases = [
+                observed_name
+                for observed_name in expected_spec.observed_names
+                if observed_name != name and observed_by_name.get(observed_name, 0) > 0
+            ]
             message_frequencies[name] = {
                 "count": observed_count,
                 "expected_hz": round(expected_spec.expected_hz, 3) if expected_spec.expected_hz is not None else None,
                 "observed_hz": round(observed_hz, 3),
                 "observed_names": list(expected_spec.observed_names),
+                "observed_aliases": observed_aliases,
+                "observed_by_name": observed_by_name,
             }
             if discovery_only:
                 continue
@@ -2604,6 +2637,7 @@ class LiveValidator:
                 "profile": self.args.profile,
                 "format": self.args.format,
                 "enable_raw": self.args.enable_raw,
+                "enable_ggah": self.args.enable_ggah,
                 "send_version": self.args.send_version,
                 "factory_reset": self.args.factory_reset,
                 "reset": self.args.reset,
@@ -2647,6 +2681,10 @@ class LiveValidator:
                     for item in self.state.binary_crc_failures_recent
                 ],
                 "binary_known_but_unparsed": self.state.binary_known_but_unparsed,
+                "gsv_by_constellation": {
+                    constellation_name_from_gsv_talker(talker): count
+                    for talker, count in sorted(self.state.gsv_counts.items())
+                },
             },
             "commands": {
                 "sent": self.state.sent_commands,
@@ -2834,9 +2872,21 @@ class LiveValidator:
         for name, item in summary["expected_messages"].items():
             expected_hz = item["expected_hz"]
             expected_text = f"{expected_hz:6.2f} Hz" if expected_hz is not None else "onchange"
+            alias_text = ""
+            if item.get("observed_aliases"):
+                alias_text = f"  observed_as={','.join(item['observed_aliases'])}"
             print(
                 f"  {name:14s} count={item['count']:3d}  observed={item['observed_hz']:6.2f} Hz  "
-                f"expected={expected_text}"
+                f"expected={expected_text}{alias_text}"
+            )
+        if summary["capture"]["gsv_by_constellation"]:
+            print(
+                "  "
+                + "GSV totals: "
+                + ", ".join(
+                    f"{name}={count}"
+                    for name, count in summary["capture"]["gsv_by_constellation"].items()
+                )
             )
         if summary["config"]["format"] == "hybrid":
             hybrid = summary["hybrid_comparison"]
@@ -2914,6 +2964,11 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         "--enable-raw",
         action="store_true",
         help="Expect and validate raw observations (effective only in survey/high_precision)",
+    )
+    parser.add_argument(
+        "--enable-ggah",
+        action="store_true",
+        help="Also schedule and validate the optional slave-antenna GPGGAH/GNGGAH output",
     )
     parser.add_argument(
         "--factory-reset",

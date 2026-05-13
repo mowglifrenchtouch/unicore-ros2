@@ -195,6 +195,10 @@ uint32_t UnicoreTransport::read_le32(const unsigned char* data)
 
 uint32_t UnicoreTransport::crc32_unicore_binary(std::string_view data)
 {
+  // Unicore N4 binary CRC32 covers the full frame from the AA 44 B5 sync
+  // through the end of the payload, excluding only the trailing 4-byte CRC
+  // field. It uses the reflected 0x04C11DB7 polynomial form with
+  // init=0x00000000 and xorout=0x00000000.
   uint32_t crc = 0U;
   for (const unsigned char byte : data)
   {

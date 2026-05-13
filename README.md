@@ -44,9 +44,9 @@ Le backend est structure en briques separees pour garder un pipeline lisible et 
 | Bloc | Role |
 | --- | --- |
 | Transport | `src/unicore_transport.cpp` gere le flux serie, la detection des trames ASCII/binary, la resynchronisation et le CRC binaire. |
-| Parser ASCII | `src/um982_parser.cpp` decode les phrases NMEA et les logs Unicore ASCII de navigation, RTK, satellites, RF et hardware. |
+| Parser ASCII | `src/unicore_parser.cpp` decode les phrases NMEA et les logs Unicore ASCII de navigation, RTK, satellites, RF et hardware. |
 | Parser binaire | `src/unicore_binary_nav.cpp` decode les messages N4 binaires equivalentes, y compris `OBSVMCMPB`. |
-| Diagnostics | `src/um982_node.cpp` construit des `diagnostic_msgs/DiagnosticArray` pour fix, RTK, RTCM, satellites, RF, hardware, jamming, raw observations et sante parser/transport. |
+| Diagnostics | `src/unicore_node.cpp` construit des `diagnostic_msgs/DiagnosticArray` pour fix, RTK, RTCM, satellites, RF, hardware, jamming, raw observations et sante parser/transport. |
 | Integration ROS 2 | Le noeud publie `sensor_msgs/msg/NavSatFix`, `compass_msgs/msg/Azimuth`, consomme `rtcm_msgs/msg/Message` et expose une configuration YAML/launch standard. |
 | Validation live | `tools/unicore_live_validate.py` permet de valider un flux serie en direct sans lancer ROS 2. |
 

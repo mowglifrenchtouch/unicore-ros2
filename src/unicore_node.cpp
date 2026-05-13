@@ -27,7 +27,7 @@
 #include "unicore_gnss/unicore_binary_nav.hpp"
 #include "unicore_gnss/serial_port.hpp"
 #include "unicore_gnss/unicore_transport.hpp"
-#include "unicore_gnss/um982_parser.hpp"
+#include "unicore_gnss/unicore_parser.hpp"
 #include <compass_msgs/msg/azimuth.hpp>
 #include <diagnostic_msgs/msg/diagnostic_array.hpp>
 #include <diagnostic_msgs/msg/diagnostic_status.hpp>
@@ -556,10 +556,10 @@ std::string describe_jam_flag(int flag)
 
 }  // namespace
 
-class Um982Node : public rclcpp::Node
+class UnicoreNode : public rclcpp::Node
 {
 public:
-  Um982Node() : rclcpp::Node("um982_node")
+  UnicoreNode() : rclcpp::Node("unicore_node")
   {
     port_ = declare_parameter<std::string>("port", "/dev/gps");
     baudrate_ = declare_parameter<int>("baudrate", 921600);
@@ -613,16 +613,16 @@ public:
                                                                                rclcpp::QoS(10));
     rtcm_sub_ = create_subscription<rtcm_msgs::msg::Message>(rtcm_topic_,
                                                              rclcpp::QoS(10),
-                                                             std::bind(&Um982Node::handle_rtcm,
+                                                             std::bind(&UnicoreNode::handle_rtcm,
                                                                        this,
                                                                        std::placeholders::_1));
 
     const auto poll_period = std::chrono::duration<double>(1.0 / std::max(1.0, read_poll_hz_));
     poll_timer_ =
         create_wall_timer(std::chrono::duration_cast<std::chrono::milliseconds>(poll_period),
-                          std::bind(&Um982Node::poll_serial, this));
+                          std::bind(&UnicoreNode::poll_serial, this));
     diagnostics_timer_ = create_wall_timer(std::chrono::seconds(1),
-                                           std::bind(&Um982Node::publish_diagnostics, this));
+                                           std::bind(&UnicoreNode::publish_diagnostics, this));
 
     RCLCPP_INFO(get_logger(),
                 "Unicore node configured: port=%s baudrate=%d fix_topic=%s heading_topic=%s "
@@ -2961,7 +2961,7 @@ private:
   std::string rtcm_topic_;
 
   SerialPort serial_;
-  Um982Parser parser_;
+  UnicoreParser parser_;
   UnicoreBinaryNavParser binary_nav_parser_;
   UnicoreTransport transport_;
   UnicoreBinaryDispatcher binary_dispatcher_;
@@ -3026,7 +3026,7 @@ private:
 int main(int argc, char* argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<unicore_gnss::Um982Node>());
+  rclcpp::spin(std::make_shared<unicore_gnss::UnicoreNode>());
   rclcpp::shutdown();
   return 0;
 }

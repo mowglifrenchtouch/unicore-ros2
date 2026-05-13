@@ -20,7 +20,7 @@ add_library(${PROJECT_NAME}_core STATIC
   src/serial_port.cpp
   src/unicore_binary_nav.cpp
   src/unicore_transport.cpp
-  src/um982_parser.cpp
+  src/unicore_parser.cpp
 )
 
 target_include_directories(${PROJECT_NAME}_core
@@ -36,7 +36,7 @@ set(UNICORE_NODE_TARGETS
 
 foreach(node_target IN LISTS UNICORE_NODE_TARGETS)
   add_executable(${node_target}
-    src/um982_node.cpp
+    src/unicore_node.cpp
   )
 
   target_link_libraries(${node_target}
@@ -81,10 +81,10 @@ if(BUILD_TESTING)
   set(ament_cmake_copyright_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 
-  ament_add_gtest(test_um982_parser
-    test/test_um982_parser.cpp
+  ament_add_gtest(test_unicore_parser
+    test/test_unicore_parser.cpp
   )
-  target_link_libraries(test_um982_parser
+  target_link_libraries(test_unicore_parser
     ${PROJECT_NAME}_core
   )
 

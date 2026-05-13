@@ -12,7 +12,7 @@
 
 #include "unicore_gnss/unicore_binary_nav.hpp"
 #include "unicore_gnss/unicore_transport.hpp"
-#include "unicore_gnss/um982_parser.hpp"
+#include "unicore_gnss/unicore_parser.hpp"
 #include <gtest/gtest.h>
 
 namespace unicore_gnss
@@ -915,7 +915,7 @@ TEST(UnicoreBinaryNavParser, ObsvmcmpbZeroCn0CanBeIgnoredInSummaries)
 
 TEST(UnicoreBinaryNavParser, HybridSamplesMatchAsciiWithinTolerance)
 {
-  Um982Parser ascii_parser;
+  UnicoreParser ascii_parser;
   UnicoreBinaryNavParser binary_parser;
 
   const auto ascii_bestnav = ascii_parser.parse_line(make_unicore_ascii(
@@ -961,7 +961,7 @@ TEST(UnicoreBinaryNavParser, HybridSamplesMatchAsciiWithinTolerance)
 
 TEST(UnicoreBinaryNavParser, HybridSatelliteAndRtcmSamplesMatchAsciiWithinTolerance)
 {
-  Um982Parser ascii_parser;
+  UnicoreParser ascii_parser;
   UnicoreBinaryNavParser binary_parser;
 
   const auto ascii_bestsat = ascii_parser.parse_line(make_unicore_ascii(
@@ -1010,7 +1010,7 @@ TEST(UnicoreBinaryNavParser, HybridSatelliteAndRtcmSamplesMatchAsciiWithinTolera
 
 TEST(UnicoreBinaryNavParser, HybridRtkRfHardwareJammingSamplesMatchAscii)
 {
-  Um982Parser ascii_parser;
+  UnicoreParser ascii_parser;
   UnicoreBinaryNavParser binary_parser;
 
   const auto ascii_rtk = ascii_parser.parse_line(make_unicore_ascii(

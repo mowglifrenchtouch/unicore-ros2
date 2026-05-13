@@ -7,7 +7,7 @@
 #include <optional>
 
 #include "unicore_gnss/unicore_transport.hpp"
-#include "unicore_gnss/um982_parser.hpp"
+#include "unicore_gnss/unicore_parser.hpp"
 
 namespace unicore_gnss
 {

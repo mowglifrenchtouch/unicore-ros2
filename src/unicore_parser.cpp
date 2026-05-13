@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "unicore_gnss/um982_parser.hpp"
+#include "unicore_gnss/unicore_parser.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -326,7 +326,7 @@ std::string signal_band_from_frequency_id(std::string_view constellation, int fr
 
 }  // namespace
 
-std::optional<ParsedSentence> Um982Parser::parse_line(const std::string& line) const
+std::optional<ParsedSentence> UnicoreParser::parse_line(const std::string& line) const
 {
   const std::string trimmed = trim(line);
   if (trimmed.empty())
@@ -462,12 +462,12 @@ std::optional<ParsedSentence> Um982Parser::parse_line(const std::string& line) c
   return std::nullopt;
 }
 
-ParserCounters Um982Parser::counters() const
+ParserCounters UnicoreParser::counters() const
 {
   return counters_;
 }
 
-bool Um982Parser::validate_nmea_checksum(std::string_view line)
+bool UnicoreParser::validate_nmea_checksum(std::string_view line)
 {
   if (line.size() < 4U || line.front() != '$')
   {
@@ -492,7 +492,7 @@ bool Um982Parser::validate_nmea_checksum(std::string_view line)
   return end != nullptr && *end == '\0' && checksum == static_cast<uint8_t>(received);
 }
 
-bool Um982Parser::validate_unicore_crc(std::string_view line)
+bool UnicoreParser::validate_unicore_crc(std::string_view line)
 {
   if (line.size() < 11U || line.front() != '#')
   {
@@ -512,7 +512,7 @@ bool Um982Parser::validate_unicore_crc(std::string_view line)
   return end != nullptr && *end == '\0' && calculated == received;
 }
 
-std::vector<std::string_view> Um982Parser::split_fields(std::string_view payload)
+std::vector<std::string_view> UnicoreParser::split_fields(std::string_view payload)
 {
   std::vector<std::string_view> fields;
   std::size_t start = 0U;
@@ -530,7 +530,7 @@ std::vector<std::string_view> Um982Parser::split_fields(std::string_view payload
   return fields;
 }
 
-std::string Um982Parser::trim(std::string_view text)
+std::string UnicoreParser::trim(std::string_view text)
 {
   std::size_t start = 0U;
   std::size_t end = text.size();
@@ -545,7 +545,7 @@ std::string Um982Parser::trim(std::string_view text)
   return std::string(text.substr(start, end - start));
 }
 
-bool Um982Parser::parse_double(std::string_view field, double& value)
+bool UnicoreParser::parse_double(std::string_view field, double& value)
 {
   if (field.empty())
   {
@@ -558,7 +558,7 @@ bool Um982Parser::parse_double(std::string_view field, double& value)
   return end != nullptr && *end == '\0' && std::isfinite(value);
 }
 
-bool Um982Parser::parse_int(std::string_view field, int& value)
+bool UnicoreParser::parse_int(std::string_view field, int& value)
 {
   if (field.empty())
   {
@@ -576,7 +576,7 @@ bool Um982Parser::parse_int(std::string_view field, int& value)
   return true;
 }
 
-bool Um982Parser::parse_uint32(std::string_view field, int base, uint32_t& value)
+bool UnicoreParser::parse_uint32(std::string_view field, int base, uint32_t& value)
 {
   if (field.empty())
   {
@@ -594,7 +594,7 @@ bool Um982Parser::parse_uint32(std::string_view field, int base, uint32_t& value
   return true;
 }
 
-bool Um982Parser::parse_latlon(std::string_view value_field,
+bool UnicoreParser::parse_latlon(std::string_view value_field,
                                std::string_view hemi_field,
                                bool is_latitude,
                                double& degrees)
@@ -622,7 +622,7 @@ bool Um982Parser::parse_latlon(std::string_view value_field,
   return hemi == 'N' || hemi == 'S' || hemi == 'E' || hemi == 'W';
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_gga(const std::vector<std::string_view>& fields)
+std::optional<ParsedSentence> UnicoreParser::parse_gga(const std::vector<std::string_view>& fields)
 {
   if (fields.size() < 10U)
   {
@@ -664,7 +664,7 @@ std::optional<ParsedSentence> Um982Parser::parse_gga(const std::vector<std::stri
   return sentence;
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_hdt(const std::vector<std::string_view>& fields)
+std::optional<ParsedSentence> UnicoreParser::parse_hdt(const std::vector<std::string_view>& fields)
 {
   if (fields.size() < 2U)
   {
@@ -686,7 +686,7 @@ std::optional<ParsedSentence> Um982Parser::parse_hdt(const std::vector<std::stri
   return sentence;
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_hpr(const std::vector<std::string_view>& fields)
+std::optional<ParsedSentence> UnicoreParser::parse_hpr(const std::vector<std::string_view>& fields)
 {
   if (fields.size() < 5U)
   {
@@ -713,7 +713,7 @@ std::optional<ParsedSentence> Um982Parser::parse_hpr(const std::vector<std::stri
   return sentence;
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_pvtslna(
+std::optional<ParsedSentence> UnicoreParser::parse_pvtslna(
     const std::vector<std::string_view>& fields)
 {
   if (fields.size() <= kPvtslnaBestposLongitudeStdIndex)
@@ -799,7 +799,7 @@ std::optional<ParsedSentence> Um982Parser::parse_pvtslna(
   return sentence;
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_bestnava(
+std::optional<ParsedSentence> UnicoreParser::parse_bestnava(
     const std::vector<std::string_view>& fields)
 {
   if (fields.size() <= kBestnavaHorizontalSpeedStdIndex)
@@ -938,7 +938,7 @@ std::optional<ParsedSentence> Um982Parser::parse_bestnava(
   return sentence;
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_rtkstatusa(
+std::optional<ParsedSentence> UnicoreParser::parse_rtkstatusa(
     const std::vector<std::string_view>& fields)
 {
   if (fields.size() <= kRtkstatusaAdrObservationCountIndex)
@@ -994,7 +994,7 @@ std::optional<ParsedSentence> Um982Parser::parse_rtkstatusa(
   return sentence;
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_rtcmstatusa(
+std::optional<ParsedSentence> UnicoreParser::parse_rtcmstatusa(
     const std::vector<std::string_view>& fields)
 {
   if (fields.size() <= kRtcmstatusaL6CountIndex)
@@ -1035,7 +1035,7 @@ std::optional<ParsedSentence> Um982Parser::parse_rtcmstatusa(
   return sentence;
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_bestsata(
+std::optional<ParsedSentence> UnicoreParser::parse_bestsata(
     const std::vector<std::string_view>& fields)
 {
   if (fields.size() <= kBestsataEntryCountIndex)
@@ -1086,7 +1086,7 @@ std::optional<ParsedSentence> Um982Parser::parse_bestsata(
   return sentence;
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_satsinfoa(
+std::optional<ParsedSentence> UnicoreParser::parse_satsinfoa(
     const std::vector<std::string_view>& fields)
 {
   if (fields.size() <= kSatsinfoaFrequencyFlagIndex)
@@ -1199,7 +1199,7 @@ std::optional<ParsedSentence> Um982Parser::parse_satsinfoa(
   return sentence;
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_agca(
+std::optional<ParsedSentence> UnicoreParser::parse_agca(
     const std::vector<std::string_view>& fields)
 {
   if (fields.size() <= kAgcaAnt2L5Index)
@@ -1224,7 +1224,7 @@ std::optional<ParsedSentence> Um982Parser::parse_agca(
   return sentence;
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_hwstatusa(
+std::optional<ParsedSentence> UnicoreParser::parse_hwstatusa(
     const std::vector<std::string_view>& fields)
 {
   if (fields.size() <= kHwstatusaPllLockIndex)
@@ -1263,7 +1263,7 @@ std::optional<ParsedSentence> Um982Parser::parse_hwstatusa(
   return sentence;
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_jamstatusa(
+std::optional<ParsedSentence> UnicoreParser::parse_jamstatusa(
     const std::vector<std::string_view>& fields)
 {
   if (fields.size() <= kJamstatusaCwFlagIndex)
@@ -1289,7 +1289,7 @@ std::optional<ParsedSentence> Um982Parser::parse_jamstatusa(
   return sentence;
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_freqjamstatusa(
+std::optional<ParsedSentence> UnicoreParser::parse_freqjamstatusa(
     const std::vector<std::string_view>& fields)
 {
   if (fields.size() <= kFreqjamstatusaL5FlagIndex)
@@ -1315,7 +1315,7 @@ std::optional<ParsedSentence> Um982Parser::parse_freqjamstatusa(
   return sentence;
 }
 
-std::optional<ParsedSentence> Um982Parser::parse_gsv(
+std::optional<ParsedSentence> UnicoreParser::parse_gsv(
     std::string_view talker, const std::vector<std::string_view>& fields)
 {
   // GSV layout: $<talker>GSV,<total_msgs>,<msg_num>,<sats_in_view>,...
@@ -1340,7 +1340,7 @@ std::optional<ParsedSentence> Um982Parser::parse_gsv(
   return sentence;
 }
 
-int Um982Parser::position_type_to_gga_quality(std::string_view text)
+int UnicoreParser::position_type_to_gga_quality(std::string_view text)
 {
   // String form from Table 0-4 in the N4 R1.4 manual.
   if (text == "NONE") return 0;

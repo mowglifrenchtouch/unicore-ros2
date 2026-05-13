@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -92,6 +93,41 @@ std::string make_binary_frame(uint16_t message_id,
   }
   append_le32(frame, crc);
   return frame;
+}
+
+std::string bytes_from_hex(std::string_view hex)
+{
+  if ((hex.size() % 2U) != 0U)
+  {
+    throw std::runtime_error("hex string must have an even length");
+  }
+
+  auto nibble = [](char ch) -> uint8_t
+  {
+    if (ch >= '0' && ch <= '9')
+    {
+      return static_cast<uint8_t>(ch - '0');
+    }
+    if (ch >= 'a' && ch <= 'f')
+    {
+      return static_cast<uint8_t>(10 + (ch - 'a'));
+    }
+    if (ch >= 'A' && ch <= 'F')
+    {
+      return static_cast<uint8_t>(10 + (ch - 'A'));
+    }
+    throw std::runtime_error("invalid hex digit");
+  };
+
+  std::string bytes;
+  bytes.reserve(hex.size() / 2U);
+  for (std::size_t index = 0U; index < hex.size(); index += 2U)
+  {
+    const uint8_t high = nibble(hex[index]);
+    const uint8_t low = nibble(hex[index + 1U]);
+    bytes.push_back(static_cast<char>((high << 4U) | low));
+  }
+  return bytes;
 }
 
 }  // namespace
@@ -267,6 +303,42 @@ TEST(UnicoreTransport, ExtractsObservedBestnavStyleFrame)
   ASSERT_TRUE(transport.binary_counters().last_header_length.has_value());
   ASSERT_TRUE(transport.binary_counters().last_payload_length.has_value());
   EXPECT_EQ(*transport.binary_counters().last_header_length, kUnicoreBinaryHeaderSize);
+  EXPECT_EQ(*transport.binary_counters().last_payload_length, 120U);
+}
+
+TEST(UnicoreTransport, ExtractsCapturedBestnavFrameFromFieldDump)
+{
+  UnicoreTransport transport({true, true, 512U});
+  const std::string frame = bytes_from_hex(
+      "aa44b5614608780000a07209c82ba4120000000000120c00000000001000000008cc66e025fa4540"
+      "1052859c789e01400000b0c5dd2b65406aa349423d000000325ac03f62b68f3fdb10104030000000"
+      "0000000000005442211c1c0004121151000000000800000000000000000000009c6414e86d43803f"
+      "8ef677e58cd36340c1c1bfecd94386bfe13edb3c8758ab3c961ec655");
+
+  ASSERT_EQ(frame.size(), 148U);
+  EXPECT_EQ(static_cast<unsigned char>(frame[0]), 0xAAU);
+  EXPECT_EQ(static_cast<unsigned char>(frame[1]), 0x44U);
+  EXPECT_EQ(static_cast<unsigned char>(frame[2]), 0xB5U);
+  EXPECT_EQ(static_cast<unsigned char>(frame[3]), 0x61U);
+  EXPECT_EQ(static_cast<unsigned char>(frame[4]), 0x46U);
+  EXPECT_EQ(static_cast<unsigned char>(frame[5]), 0x08U);
+  EXPECT_EQ(static_cast<unsigned char>(frame[6]), 0x78U);
+  EXPECT_EQ(static_cast<unsigned char>(frame[7]), 0x00U);
+
+  transport.append(reinterpret_cast<const uint8_t*>(frame.data()), frame.size());
+  const auto events = transport.drain();
+
+  ASSERT_EQ(events.size(), 1U);
+  ASSERT_TRUE(events.front().binary_frame.has_value());
+  EXPECT_EQ(events.front().binary_frame->message_id, 2118U);
+  EXPECT_EQ(events.front().binary_frame->payload_length, 120U);
+  EXPECT_TRUE(events.front().binary_frame->crc_valid);
+  EXPECT_EQ(transport.binary_counters().frames_total, 1U);
+  EXPECT_EQ(transport.binary_counters().crc_errors, 0U);
+  EXPECT_EQ(transport.binary_counters().sync_candidates, 1U);
+  ASSERT_TRUE(transport.binary_counters().last_header_length.has_value());
+  ASSERT_TRUE(transport.binary_counters().last_payload_length.has_value());
+  EXPECT_EQ(*transport.binary_counters().last_header_length, 24U);
   EXPECT_EQ(*transport.binary_counters().last_payload_length, 120U);
 }
 
